@@ -2,6 +2,7 @@ import streamlit as st
 import sqlite3
 import pandas as pd
 from datetime import datetime
+import pytz
 import streamlit.components.v1 as components
 
 # Configuração da página do painel
@@ -45,7 +46,7 @@ def carregar_dados():
 df = carregar_dados()
 
 if df.empty:
-    st.warning("⚠️️ A base de dados está vazia. Execute o leitor de prints primeiro.")
+    st.warning("⚠ A base de dados está vazia. Execute o leitor de prints primeiro.")
 else:
     # Função inteligente e robusta para isolar o bairro corretamente
     def extrair_bairro(row):
@@ -84,10 +85,13 @@ else:
     st.markdown("---")
     st.subheader("🛰️ Bloco 3: Painel de Campo em Tempo Real (GPS Ativo)")
 
-    # Captura automática de data e hora do sistema
+    # Captura automática de data e hora ajustada para o fuso horário de Brasília
+    fuso_br = pytz.timezone('America/Sao_Paulo')
+    agora_br = datetime.now(fuso_br)
+
     dias_pt = ["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado", "Domingo"]
-    dia_atual_calc = dias_pt[datetime.now().weekday()]
-    hora_atual_calc = datetime.now().strftime("%H:%M")
+    dia_atual_calc = dias_pt[agora_br.weekday()]
+    hora_atual_calc = agora_br.strftime("%H:%M")
 
     col_info1, col_info2 = st.columns(2)
     with col_info1:
@@ -120,7 +124,7 @@ else:
                             document.getElementById("gps-status").innerHTML = "⚠️ Permissão negada. Vá às definições do Chrome e permita o acesso à localização para este site.";
                             break;
                         case error.POSITION_UNAVAILABLE:
-                            document.getElementById("gps-status").innerHTML = "⚠️️ Informação de localização indisponível.";
+                            document.getElementById("gps-status").innerHTML = "⚠ Informação de localização indisponível.";
                             break;
                         case error.TIMEOUT:
                             document.getElementById("gps-status").innerHTML = "⚠️ Tempo esgotado ao procurar GPS.";
